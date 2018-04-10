@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/bootstrap.min.css" />
+  <link rel="stylesheet" href="css/default.css" />
+  <title>IPA: Show Costumer Informations</title>
+</head>
+
+<body>
+
+<!-- Modal for Function search_gp -->
+  <div class="modal fade" id="selection_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  		<div class="modal-dialog" role="document">
+  		    <div class="modal-content">
+  		      <div class="modal-header">
+  			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+  			<h4 class="modal-title" id="myModalLabel">Gefundene Geschäftspartner</h4>
+  		      </div>
+  		      <div class="modal-body">
+
+          			<table class="table table-hover" >
+          			  <thead>
+          			     <tr>
+          				<th>Geschäftspartner</th>
+          				<th>Nachname / Name 1</th>
+          				<th>Vorname / Name 2</th>
+          			      </tr>
+          			</thead>
+          		   <tbody>
+          		   </tbody>
+          		</table>
+  		      </div>
+  		      <div class="modal-footer">
+  			<button type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+  			<button type="button" class="btn btn-primary" onclick="getDetails()" data-toggle="collapse" data-target="#show_GP_Details" aria-expanded="false" aria-controls="show_GP_Details" >Suchen</button>
+  		      </div>
+  		    </div>
+  		  </div>
+  		</div>
+
+
+  <!-- Header -->
+  <nav class="fixed-nav-bar">
+    <img class="menu-logo" src="images/logo.png" />
+  </nav>
+
+  <!-- Suche -->
+
+
+  <div id="container">
+    <div class="row">
+      <div class="col-md-12">
+
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4">
+        <div class="page-header">
+        <h3>Geschäftspertner suche</h3>
+        </div>
+
+        <form>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="input_GP">Geschäftspertner</label>
+              <input type="text" class="form-control" id="input_GP" placeholder="Geschäftspertner">
+
+
+
+            </div>
+            <div class="form-group col-md-6">
+              <label for="inputGP_Type">Geschäftspartnertyp:</label>
+              <select id="inputGP_Type" class="form-control">
+              <option value="">Alle</option>
+              <option value="1">Privatperson</option>
+              <option value="2">Organisation</option>
+              <option value="3">Gruppe</option>
+            </select>
+
+
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="input_Name1">Nachname / Name 1</label>
+              <input type="text" class="form-control" id="input_Name1" placeholder="Firmen-, Gruppen- oder Nachname">
+
+
+            </div>
+            <div class="form-group col-md-6">
+              <label for="input_Name2">Vorname / Name 2</label>
+              <input type="text" class="form-control" id="input_Name2" placeholder="Namenzusatz oder Vorname">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-9">
+              <label for="input_Street">Strasse</label>
+              <input type="text" class="form-control" id="input_Street" placeholder="Strasse">
+
+
+            </div>
+            <div class="form-group col-md-3">
+              <label for="input_HouseNo">Hausnummer</label>
+              <input type="text" class="form-control" id="input_HouseNo">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-9">
+              <label for="input_city">Ort</label>
+              <input type="text" class="form-control" id="input_city" placeholder="Strasse">
+
+
+            </div>
+            <div class="form-group col-md-3">
+              <label for="input_PLZ">PLZ</label>
+              <input type="text" class="form-control" id="input_PLZ">
+            </div>
+          </div>
+          <div class="form-group col-md-12">
+            <button type="button" class="btn btn-primary" onclick="search();">Suchen</button>
+            <button type="button" class="btn btn-default">Felder leeren</button>
+
+          </div>
+        </form>
+      </div>
+
+
+  </div>
+	<!-- Shwo GP Information -->
+<div class="collapse" id="show_GP_Details">
+  <div class="card card-block">
+<div class="col-md-6">
+
+  <div class="page-header">
+    <h3>GP Informationen</h3>
+
+
+  </div>
+</div>
+
+<div class="col-md-6">
+  <div class="page-header">
+  <h3>QMC Produkte</h3>
+  </div>
+</div></div>
+
+
+
+   </div>
+</div>
+
+</body>
+
+
+
+
+
+
+
+<!-- Java Scripts -->
+<script src="js/jquery-3.3.1.min.js"></script>
+<script src="js/bootstrap/bootstrap.min.js"></script>
+<script src="js/jquery.soap/jquery.soap.js"></script>
+<script src="js/jquery.soap/jquery.doedje.xml2json.js"></script>
+<script src="js/default.js" type="text/javascript"></script>
+
+</html>
