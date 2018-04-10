@@ -3,9 +3,7 @@ var password = 'ipa4nicole';
 var json_search = '';
 
 
-var test = document.getElementById('input_GP').value;
-
-function search(test)
+function search()
 {
 
   var ex_gp = document.getElementById('input_GP').value;
@@ -78,4 +76,45 @@ if (json_search['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_SearchResponse
 
 function getDetails() {
 
+}
+
+
+function checkSearchForm() {
+var Fehler = "";
+var Fehler_Message = "";
+
+if (document.forms.SearchForm.input_GP.value.length>0 && document.forms.SearchForm.input_GP.value.length<7)
+{
+Fehler = "X";
+Fehler_Message = "<li>Die länge der Geschäftspartnernummer ist zu kurz. Die Nummer muss 7-Zeichen lang sein.</li>";
+document.getElementById('div_i_gp').classList.add('has-error');
+
+
+}
+
+if (document.forms.SearchForm.input_GP.value == "" && document.forms.SearchForm.input_Name2.value == "" &&
+document.forms.SearchForm.input_Name1.value == "" && document.forms.SearchForm.input_Street.value == "" &&
+document.forms.SearchForm.input_HouseNo.value == "" && document.forms.SearchForm.input_city.value == "" &&
+document.forms.SearchForm.input_PLZ.value == "")
+{
+Fehler = "X";
+Fehler_Message = Fehler_Message + "<li>Mindestens ein Feld muss ausgefüllt werden.</li>"
+document.getElementById('From_search').classList.add('has-error');
+
+}
+if (Fehler == "X")
+{
+Fehler_Message = "<ul style='list-style-type:disc'>" +Fehler_Message+ "</ul>";
+var error_message = document.createElement("DIV");
+error_message.classList.add('alert');
+error_message.classList.add('alert-danger');
+var error_message_text = document.createTextNode(Fehler_Message);
+error_message.appendChild(error_message_text);
+document.test.appendChild(error_message);
+
+}
+else
+{
+
+}
 }

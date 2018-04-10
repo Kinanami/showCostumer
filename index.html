@@ -63,11 +63,11 @@
         <h3>Geschäftspertner suche</h3>
         </div>
 
-        <form>
+        <form id="From_search" name="SearchForm" >
           <div class="form-row">
-            <div class="form-group col-md-6">
+            <div id="div_i_gp" class="form-group col-md-6">
               <label for="input_GP">Geschäftspertner</label>
-              <input type="text" class="form-control" id="input_GP" placeholder="Geschäftspertner">
+              <input name="input_GP" type="number" class="form-control" id="input_GP" placeholder="Geschäftspertner" maxlength="7" minlength="7">
 
 
 
@@ -86,9 +86,9 @@
           </div>
 
           <div class="form-row">
-            <div class="form-group col-md-6">
+            <div   class="form-group col-md-6">
               <label for="input_Name1">Nachname / Name 1</label>
-              <input type="text" class="form-control" id="input_Name1" placeholder="Firmen-, Gruppen- oder Nachname">
+              <input name="input_Name1" type="text" class="form-control " id="input_Name1" placeholder="Firmen-, Gruppen- oder Nachname">
 
 
             </div>
@@ -124,7 +124,7 @@
             </div>
           </div>
           <div class="form-group col-md-12">
-            <button type="button" class="btn btn-primary" onclick="search();">Suchen</button>
+            <button type="button" class="btn btn-primary" onclick="checkSearchForm()">Suchen</button>
             <button type="button" class="btn btn-default">Felder leeren</button>
 
           </div>
