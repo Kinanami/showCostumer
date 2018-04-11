@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/bootstrap.min.css" />
+  <link rel="stylesheet" href="css/default.css" />
+  <title>IPA: Show Costumer Informations</title>
+
+  <script src="js/jquery-3.3.1.min.js"></script>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.js"></script>
+  <script src="js/bootstrap/bootstrap.min.js"></script>
+  <script src="js/jquery.soap/jquery.soap.js"></script>
+  <script src="js/jquery.soap/jquery.doedje.xml2json.js"></script>
+  <script src="js/default.js" type="text/javascript"></script>
+</head>
+
+
+<script>
+var username = 'FROXAPPL';
+var password = 'Frox4wwz!';
+var selected_gp = '';
+var elemenent  = '';
+
+function SearchUser() <!-- Funktion zum Suchen der passenden User  -->
+{
+alert("HAllo");
+
+
+  $.soap({
+    url: 'http://sappot101.wwz.local:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=WEB_T&receiverParty=&receiverService=&interface=ssBP_Search&interfaceNamespace=http://wwz.ch/S/99980/BP_Search',
+    method: 'bp:BP_SearchRequest',
+    noPrefix: true,
+    appendMethodToURL: false,
+    namespaceQualifier: 'bp',
+    namespaceURL: 'http://wwz.ch/S/99980/BP_Search',
+    timeout: 5000,
+
+    data: {
+      GP_No: '1000001',
+
+    },
+
+    HTTPHeaders: {
+      Authorization: 'Basic ' + btoa(username + ':' + password)
+    },
+
+ 		success: function (soapResponse) {
+
+ 			json = soapResponse.toJSON();
+ 			$("tbody").empty();
+
+ 			Object.keys(json['#document']['SOAP:Envelope']['SOAP:Body']['ns1:SearchCustomerResponse'].persons.person).forEach(function(key) {
+
+ 			var r_gp = json['#document']['SOAP:Envelope']['SOAP:Body']['ns1:SearchCustomerResponse'].persons.person[key].Partner_no['#text'];
+ 			var r_lastname 	= json['#document']['SOAP:Envelope']['SOAP:Body']['ns1:SearchCustomerResponse'].persons.person[key].Firstname['#text'];
+ 			var r_firstname = json['#document']['SOAP:Envelope']['SOAP:Body']['ns1:SearchCustomerResponse'].persons.person[key].Lastname['#text'];
+
+
+
+ 			$("tbody").append('<tr id = '+key+' onclick="set_selected_GP(this.id);"> <td>'+r_gp+'</td> <td>'+r_firstname+'</td> <td>'+l_lastname+'</td></tr>');
+
+
+ 			}),
+
+ 			$('#selection_modal').modal('show');
+ 		},
+
+ 	});
+
+}
+</script>
+<body>
+  <button type="button" onclick="SearchUser()">Test</button>
+</body>
+</html>

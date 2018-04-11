@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="css/default.css" />
   <title>IPA: Show Costumer Informations</title>
 </head>
+<!-- Java Scripts -->
 
 <body>
 
@@ -29,13 +30,13 @@
           				<th>Vorname / Name 2</th>
           			      </tr>
           			</thead>
-          		   <tbody>
+          		   <tbody id="t_search">
           		   </tbody>
           		</table>
   		      </div>
   		      <div class="modal-footer">
   			<button type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
-  			<button type="button" class="btn btn-primary" onclick="getDetails()" data-toggle="collapse" data-target="#show_GP_Details" aria-expanded="false" aria-controls="show_GP_Details" >Suchen</button>
+  			<button type="button" class="btn btn-primary" onclick="getDetails(v_active_gp)" data-toggle="collapse" data-target="#show_GP_Details" aria-expanded="false" aria-controls="show_GP_Details" >Suchen</button>
   		      </div>
   		    </div>
   		  </div>
@@ -140,7 +141,12 @@
 
   <div class="page-header">
     <h3>GP Informationen</h3>
-
+    <table>
+      <thead>
+    </thead>
+     <tbody id="t_details">
+     </tbody>
+    </table>
 
   </div>
 </div>
@@ -159,16 +165,15 @@
 </body>
 
 
-
-
-
-
-
-<!-- Java Scripts -->
 <script src="js/jquery-3.3.1.min.js"></script>
 <script src="js/bootstrap/bootstrap.min.js"></script>
 <script src="js/jquery.soap/jquery.soap.js"></script>
 <script src="js/jquery.soap/jquery.doedje.xml2json.js"></script>
 <script src="js/default.js" type="text/javascript"></script>
+
+
+
+
+
 
 </html>
