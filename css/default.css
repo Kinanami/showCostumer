@@ -24,7 +24,9 @@
    padding-right: : 15px;
  }
 
-#selection_modal
+
+
+#change_modal, #selection_modal
 {
   position: fixed;
    top: 70px;

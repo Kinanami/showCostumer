@@ -12,35 +12,65 @@
 
 <body>
 
-<!-- Modal for Function search_gp -->
+  <!-- Modal for Function search_gp -->
   <div class="modal fade" id="selection_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-  		<div class="modal-dialog" role="document">
-  		    <div class="modal-content">
-  		      <div class="modal-header">
-  			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-  			<h4 class="modal-title" id="myModalLabel">Gefundene Geschäftspartner</h4>
-  		      </div>
-  		      <div class="modal-body">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" >Gefundene Geschäftspartner</h4>
+        </div>
+        <div class="modal-body" id="selection_modal_body">
+          <!-- <p id="modal_error"></p> -->
+          <div id="modal_error" class="alert" role="alert">
 
-          			<table class="table table-hover" >
-          			  <thead>
-          			     <tr>
-          				<th>Geschäftspartner</th>
-          				<th>Nachname / Name 1</th>
-          				<th>Vorname / Name 2</th>
-          			      </tr>
-          			</thead>
-          		   <tbody id="t_search">
-          		   </tbody>
-          		</table>
-  		      </div>
-  		      <div class="modal-footer">
-  			<button type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
-  			<button type="button" class="btn btn-primary" onclick="getDetails(v_active_gp)" data-toggle="collapse" data-target="#show_GP_Details" aria-expanded="false" aria-controls="show_GP_Details" >Suchen</button>
-  		      </div>
-  		    </div>
-  		  </div>
-  		</div>
+          </div>
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Geschäftspartner</th>
+                <th>Nachname / Name 1</th>
+                <th>Vorname / Name 2</th>
+              </tr>
+            </thead>
+            <tbody id="t_search">
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+          <button type="button" class="btn btn-primary" onclick="getDetails(v_active_gp)" data-toggle="collapse" data-target="#show_GP_Details" aria-expanded="false" aria-controls="show_GP_Details">Suchen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Function Change Modus -->
+
+  <div class="modal fade" id="change_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Geschäftspartner ändern</h4>
+        </div>
+        <div class="modal-body" id="changeModal_body">
+          <!-- <p id="modal_error"></p> -->
+          <div id="change_Modal_error" class="alert" role="alert"></div>
+          <div id="change_Modal_Data">
+          <form id="form_changeData">
+
+          </form>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+          <button type="button" class="btn btn-primary" onclick="ssBP_Update()">Suchen</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 
   <!-- Header -->
@@ -61,10 +91,10 @@
     <div class="row">
       <div class="col-md-4">
         <div class="page-header">
-        <h3>Geschäftspertner suche</h3>
+          <h3>Geschäftspertner suche</h3>
         </div>
 
-        <form id="From_search" name="SearchForm" >
+        <form id="From_search" name="SearchForm">
           <div class="form-row">
             <div id="div_i_gp" class="form-group col-md-6">
               <label for="input_GP">Geschäftspertner</label>
@@ -87,7 +117,7 @@
           </div>
 
           <div class="form-row">
-            <div   class="form-group col-md-6">
+            <div class="form-group col-md-6">
               <label for="input_Name1">Nachname / Name 1</label>
               <input name="input_Name1" type="text" class="form-control " id="input_Name1" placeholder="Firmen-, Gruppen- oder Nachname">
 
@@ -126,41 +156,71 @@
           </div>
           <div class="form-group col-md-12">
             <button type="button" class="btn btn-primary" onclick="checkSearchForm()">Suchen</button>
+            <button type="button" class="btn btn-warning" data-toggle="collapse" data-target="#help">Hilfe</button>
             <button type="button" class="btn btn-default">Felder leeren</button>
 
           </div>
         </form>
       </div>
 
+      <div id="help" class="collapse col-md-6">
+        <div class="card card-body jumbotron ">
+          <h2 class="display-4">Hilfe zum Tool</h2>
+          <p class="lead">Nachfolgend finden Sie die Seite zu verwenden ist, und welche informationen sie Ihnen liefert. </p>
+          <hr class="my-4">
+          <p>Folgende Kriterien müssen beachtet werden, damit die Suche erfolgreich ist. </p>
+          <ul>
+            <li>Es muss mindestens 1 Feld ausgefüllt werden</li>
+            <li>Die Geschäftspartnernummer muss 7 Zeichen lang sein und darf nur werte von 0-9 enthalten</li>
+            <li>Je mehr Felder ausgefüllt werden, desto erfolgreicher die Suche</li>
+            <li>Die Angaben müssen genau sein.</li>
+            <li>Werden mehrere Treffer gefunden (Maximal 50), kann ein Datensatz ausgewählt werden</li>
+          </ul>
+          <p>Wurde erfolgreich ein Geschäftspartern gefunden/ausgewählt werden die die personlien, kominikationindormationen und, falls vorhanden, die QMC Produkte angezeigt. </p>
+        </div>
+      </div>
 
+
+
+    </div>
+    <!-- Shwo GP Information -->
+    <div class="collapse " id="show_GP_Details">
+      <div class="card card-block">
+        <div class="col-md-6">
+
+          <div class="page-header">
+            <h3>GP Informationen</h3>
+
+            <table>
+              <thead>
+              </thead>
+              <tbody id="t_details">
+              </tbody>
+            </table>
+
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="page-header">
+            <h3>QMC Produkte</h3>
+            <div id="d_qmc_selction">
+            </div>
+
+            <table>
+              <thead>
+              </thead>
+              <tbody id="t_qmc">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+
+
+    </div>
   </div>
-	<!-- Shwo GP Information -->
-<div class="collapse" id="show_GP_Details">
-  <div class="card card-block">
-<div class="col-md-6">
-
-  <div class="page-header">
-    <h3>GP Informationen</h3>
-    <table>
-      <thead>
-    </thead>
-     <tbody id="t_details">
-     </tbody>
-    </table>
-
-  </div>
-</div>
-
-<div class="col-md-6">
-  <div class="page-header">
-  <h3>QMC Produkte</h3>
-  </div>
-</div></div>
-
-
-
-   </div>
-</div>
 
 </body>
 
@@ -170,10 +230,6 @@
 <script src="js/jquery.soap/jquery.soap.js"></script>
 <script src="js/jquery.soap/jquery.doedje.xml2json.js"></script>
 <script src="js/default.js" type="text/javascript"></script>
-
-
-
-
 
 
 </html>
