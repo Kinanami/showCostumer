@@ -9,9 +9,10 @@ var v_active_gp = "";
 
 
 
-function ssBPSearch() {
+function ssBPSearch() { // Funktion zum ausführen des Webservice BP_Search und ausgabe der gefuden GPs
 
   var error_message = '';
+  // Inputfelder inhalt an Variabeln übergeben
   var ex_gp = document.getElementById('input_GP').value;
   var ex_Name1 = document.getElementById('input_Name1').value;
   var ex_Name2 = document.getElementById('input_Name2').value;
@@ -21,7 +22,7 @@ function ssBPSearch() {
   var ex_PLZ = document.getElementById('input_PLZ').value;
   var ex_city = document.getElementById('input_city').value;
 
-  $.soap({
+  $.soap({ // Aufruf des Webservice BP_Search
     url: 'http://sappot101.wwz.local:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=WEB_T&receiverParty=&receiverService=&interface=ssBP_Search&interfaceNamespace=http://wwz.ch/S/99980/BP_Search',
     method: 'bp:BP_SearchRequest',
     noPrefix: true,
@@ -30,7 +31,7 @@ function ssBPSearch() {
     namespaceURL: 'http://wwz.ch/S/99980/BP_Search',
     timeout: 5000,
 
-    data: {
+    data: { // Übergabe der der Suchkrietrein an den Webservice
       GP_No: ex_gp,
       Name_1: ex_Name1,
       Name_2: ex_Name2,
@@ -41,31 +42,31 @@ function ssBPSearch() {
       City: ex_city
     },
 
-    HTTPHeaders: {
+    HTTPHeaders: { // Zugang für den Webservivce ins SAP System
       Authorization: 'Basic ' + btoa(username + ':' + password)
     },
 
     envAttributes: {
       'xmlns:bp': 'http://wwz.ch/S/99980/BP_Search'
     },
-
+    // Bei erfolfreichem Webservice
     success: function(soapResponse) {
       var IM_GPNo = "";
       var IM_Name1 = "";
       var IM_Name2 = "";
       var IM_GPType = "";
 
-      json_search = soapResponse.toJSON();
-      result_count = json_search['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_SearchResponse'].Result_Count['#text'];
+      json_search = soapResponse.toJSON(); // Responsenachricht in JSON Convertieren
+      result_count = json_search['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_SearchResponse'].Result_Count['#text']; // Anuahl gefundener GPs auslesen
       $("#t_search").empty();
       $("#modal_error").html("");
       $("#modal_error").removeClass("alert alert-danger");
       v_active_id = "";
 
-      if (result_count > 1) {
+      if (result_count > 1) { // Falls mehr als GP gfunden wurde : Daten werden aufbereitet und in einer HTML Tabelle hinzugefügt
 
         Object.keys(json_search['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_SearchResponse'].Persons_List.Person_Details).forEach(function(key) {
-          if (key < 50) {
+          if (key < 50) { // Ab dem 50isten GP eine Benachrichtung ausgeben
             IM_GPNo = json_search['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_SearchResponse'].Persons_List.Person_Details[key].GP_No['#text'];
 
             if (json_search['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_SearchResponse'].Persons_List.Person_Details[key].Name_1) {
@@ -88,14 +89,14 @@ function ssBPSearch() {
         });
         $('#selection_modal').modal('show');
 
-      } else if (result_count == 1) {
+      } else if (result_count == 1) { // Fall 1 GP gefunden --- dircket weite mit dem auslesen der GP informtionen : getdetails()
         IM_GPNo = json_search['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_SearchResponse'].Persons_List.Person_Details.GP_No['#text'];
         v_active_gp = IM_GPNo;
         getDetails(v_active_gp);
 
 
 
-      } else if (result_count == 0) {
+      } else if (result_count == 0) { // Fals kein GP gefunden : Fehlermeldung ausgeben
         error_message = json_search['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_SearchResponse'].Message.Message_Text['#text'];
         $("#error_search").html(error_message);
         $("#error_search").addClass("alert alert-danger");
@@ -103,7 +104,7 @@ function ssBPSearch() {
 
     },
 
-    error: function(SOAPResponse) {
+    error: function(SOAPResponse) { // Fehler während der ausführung des Webservive : Fehlermeldun ausgeeben
       error_message = 'Beim verarbeiten der Anfrage ist einfehler aufgetreten';
       $("#error_search").html(error_message);
       $("#error_search").addClass("alert alert-danger");
@@ -111,7 +112,7 @@ function ssBPSearch() {
   });
 }
 
-//------------------------------------------------------------------------------------------------------------------
+// Funktion zum ausführen des Webservice BP_GetDetails
 function getDetails(selected_gp) {
   var v_name1 = "";
   var v_name2 = "";
@@ -144,85 +145,84 @@ function getDetails(selected_gp) {
       Authorization: 'Basic ' + btoa(username + ':' + password)
     },
 
-    success: function(soapResponse) {
-      $("#t_details").empty();
+    success: function(soapResponse) { // Webservice erfolgreich
+      $("#t_details").empty(); // Leeren der Tabelle für die GP Informationen jedes mal wen neue Daten gesucht werden
 
-      json_getDetail = soapResponse.toJSON();
-      if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Message.Message_Type['#text'] == "S") {
-        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Title) {
+      json_getDetail = soapResponse.toJSON(); // Response konvertieren in JSON
+      if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Message.Message_Type['#text'] == "S") { // überprüfen ob auslesen der Daten erfolgreich
+        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Title) { // Falls Anrede vorhanden
           v_title = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Title['#text'];
 
-          $('#t_details').append('<tr><td>Anrede</td><td>' + v_title + '</td></tr>');
+          $('#t_details').append('<tr><td>Anrede</td><td>' + v_title + '</td></tr>'); // Anrede in Tabelle schreiben
         }
 
-        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].GP_Type['#text'] == 1) {
+        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].GP_Type['#text'] == 1) { // Fals GP ist Provatperson
 
-          if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_1) {
+          if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_1) { // Falls namen 1 vorhanden
             v_name1 = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_1['#text'];
-
-            $('#t_details').append('<tr><td>Nachname</td><td>' + v_name1 + '</td></tr>');
+            $('#t_details').append('<tr><td>Nachname</td><td>' + v_name1 + '</td></tr>'); // Name in Tabelle schreiben
           }
 
-          if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_2) {
+          if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_2) { // Fals NAme 2 vorhanden
             v_name2 = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_2['#text'];
 
-            $('#t_details').append('<tr><td>Vorname</td><td>' + v_name2 + '</td></tr>');
+            $('#t_details').append('<tr><td>Vorname</td><td>' + v_name2 + '</td></tr>'); // Name 2 in Tabelle schreiben
           }
 
         } else {
-          if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_1) {
+          if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_1) { // Falls namen 1 vorhanden
             v_name1 = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_1['#text'];
 
-            $('#t_details').append('<tr><td>Name</td><td>' + v_name1 + '</td></tr>');
+            $('#t_details').append('<tr><td>Name</td><td>' + v_name1 + '</td></tr>');// Name in Tabelle schreiben
           }
 
-          if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_2) {
+          if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_2) {// Fals NAme 2 vorhanden
             v_name2 = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_2['#text'];
 
-            $('#t_details').append('<tr><td>Namenszusatz</td><td>' + v_name2 + '</td></tr>');
+            $('#t_details').append('<tr><td>Namenszusatz</td><td>' + v_name2 + '</td></tr>'); // Name 2 in Tabelle schreiben
           }
         }
 
-        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Street) {
+        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Street) { // Fals Strasse vohanden
           v_street = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Street['#text'];
 
-          $('#t_details').append('<tr><td>Strasse</td><td>' + v_street + '</td></tr>');
+          $('#t_details').append('<tr><td>Strasse</td><td>' + v_street + '</td></tr>'); // Strasse in Tabelle schreiben
         }
 
-        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].PLZ) {
+        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].PLZ) { // Fals PLZ vorhanden
           v_plz = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].PLZ['#text'];
 
-          $('#t_details').append('<tr><td>PLZ</td><td>' + v_plz + '</td></tr>');
+          $('#t_details').append('<tr><td>PLZ</td><td>' + v_plz + '</td></tr>'); // PLZ in Tabelle schreiben
         }
 
-        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].City) {
+        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].City) { // Fals Stadt vorhanden
           v_city = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].City['#text'];
 
-          $('#t_details').append('<tr><td>Stadt</td><td>' + v_city + '</td></tr>');
+          $('#t_details').append('<tr><td>Stadt</td><td>' + v_city + '</td></tr>'); // Stadt in Tabelle schreiben
         }
 
-        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Region) {
+        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Region) { // Fals Region vorhanden
           v_region = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Region['#text'];
 
-          $('#t_details').append('<tr><td>Region</td><td>' + v_region + '</td></tr>');
+          $('#t_details').append('<tr><td>Region</td><td>' + v_region + '</td></tr>'); // Region in Tabelle schreiben
         }
 
-        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Country) {
+        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Country) { // Fals Land vorhanden
           v_country = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Country['#text'];
 
-          $('#t_details').append('<tr><td>Land</td><td>' + v_country + '</td></tr>');
+          $('#t_details').append('<tr><td>Land</td><td>' + v_country + '</td></tr>'); // Land in TAbelle schreiben
         }
 
 
-        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Count['#text'] == 1) {
+        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Count['#text'] == 1)  // Fals nur eine Telefonnummer
 
 
           v_tel_no = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Detail.Tel_No['#text'];
-          $('#t_details').append('<tr><td>Telefon</td><td>' + v_tel_no + '</td></tr>');
+          $('#t_details').append('<tr><td>Telefon</td><td>' + v_tel_no + '</td></tr>'); // Telefonnummer in Tabelle schreiben
 
-        } else if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Count['#text'] > 1) {
+        } else if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Count['#text'] > 1) { // Fals mehrere Nummern vorhanden
 
-          Object.keys(json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Detail).forEach(function(key) {
+          Object.keys(json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Detail).forEach(function(key) { // Für jede nummer werte in Tabelle schreiben
             v_tel_no = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Detail[key].Tel_No['#text'];
             if (key > 0) {
               $('#t_details').append('<tr><td></td><td>' + v_tel_no + '</td></tr>');
@@ -236,15 +236,15 @@ function getDetails(selected_gp) {
 
 
 
-        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Count['#text'] == 1) {
+        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Count['#text'] == 1) { // Falls eine Mail vorhandne
 
 
           v_mail_adress = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Detail.E_Mail_Adress['#text'];
-          $('#t_details').append('<tr><td>E-Mail</td><td>' + v_mail_adress + '</td></tr>');
+          $('#t_details').append('<tr><td>E-Mail</td><td>' + v_mail_adress + '</td></tr>'); // Mail in tabelle schreiben
 
-        } else if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Count['#text'] > 1) {
+        } else if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Count['#text'] > 1) { // Fals mehrere E-Mails vorhanden
 
-          Object.keys(json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Detail).forEach(function(key) {
+          Object.keys(json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Detail).forEach(function(key) { // Für jede Mail wert in Tabelle schreiben
             v_mail_adress = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Detail[key].E_Mail_Adress['#text'];
             if (key > 0) {
               $('#t_details').append('<tr><td></td><td>' + v_mail_adress + '</td></tr>');
@@ -256,10 +256,10 @@ function getDetails(selected_gp) {
 
 
         }
-        $('#t_details').append('<tr><td><button class="btn btn-primary" type="button" onclick="openChangeModus(v_active_gp)">Ändern</button></td></tr>');
-        $("#error_getDetails").html();
+        $('#t_details').append('<tr><td><button class="btn btn-primary" type="button" onclick="openChangeModus(v_active_gp)">Ändern</button></td></tr>'); // Button für Änderungsmodus in letzte Tabellenzeile
+        $("#error_getDetails").html(); // Fals zuvor Fehlermdeldung ausgegeb : jetzt entfenen
         $("#error_getDetails").removeClass("alert alert-danger");
-        getQMCProducts(v_active_gp);
+        getQMCProducts(v_active_gp); // QMC IDs auslesen 
       } else {
         error_message = 'Beim verarbeiten der Anfrage ist einfehler aufgetreten';
         $("#error_getDetails").html(error_message);
@@ -582,7 +582,7 @@ function ssBP_Update() {
   var v_change_name2 = document.getElementById("inputName2").value;
 
   xml.push('<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:bp="http://wwz.ch/S/99983/BP_Update">');
-  xml.push('  <soapenv:Header/>');
+  xml.push('<soapenv:Header/>');
   xml.push('<soapenv:Body>');
   xml.push('<bp:BP_UpdateRequest>');
   xml.push('<GP_No>' + v_active_gp + '</GP_No>');
