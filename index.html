@@ -8,24 +8,21 @@
   <link rel="stylesheet" href="css/default.css" />
   <title>IPA: Show Costumer Informations</title>
 </head>
-<!-- Java Scripts -->
 
 <body>
-
-  <!-- Modal for Function search_gp -->
+  <!-- Modal for Function ssBP_Search -->
   <div class="modal fade" id="selection_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title" >Gefundene Geschäftspartner</h4>
+          <h4 class="modal-title">Gefundene Geschäftspartner</h4>
         </div>
         <div class="modal-body" id="selection_modal_body">
-          <!-- <p id="modal_error"></p> -->
-          <div id="modal_error" class="alert" role="alert">
-
-          </div>
+          <div id="modal_error"></div>
+          <!--Div für Error Nachrichten. Wird im Fehlerfall automatscih abgefüllt  -->
           <table class="table table-hover">
+            <!--Tabelle für die gfunden GPs -->
             <thead>
               <tr>
                 <th>Geschäftspartner</th>
@@ -34,19 +31,20 @@
               </tr>
             </thead>
             <tbody id="t_search">
+              <!--Inhalt der Tabelle wird automatisch in der Funktion ssBP_Search abgefüllt -->
             </tbody>
           </table>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+          <!--Startet den Webservice ssBP_GetDetails -->
           <button type="button" class="btn btn-primary" onclick="getDetails(v_active_gp)" data-toggle="collapse" data-target="#show_GP_Details" aria-expanded="false" aria-controls="show_GP_Details">Suchen</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal for Function Change Modus -->
-
+  <!-- Modal for Changemodus -->
   <div class="modal fade" id="change_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -55,23 +53,21 @@
           <h4 class="modal-title">Geschäftspartner ändern</h4>
         </div>
         <div class="modal-body" id="changeModal_body">
-          <!-- <p id="modal_error"></p> -->
-          <div id="change_Modal_error" class="alert" role="alert"></div>
+          <div id="change_Modal_error"></div>
+          <!--Div für Error Nachrichten. Wird im Fehlerfall automatscih abgefüllt  -->
           <div id="change_Modal_Data">
-          <form id="form_changeData">
-
-          </form>
+            <form id="form_changeData"></form>
+            <!-- Fromular für den Änderungsmodus. Die Input Felder werden automtisch erstellt -->
           </div>
-
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
-          <button type="button" class="btn btn-primary" onclick="ssBP_Update()">Suchen</button>
+          <button type="button" class="btn btn-primary" onclick="checkUpdateForm()">Speichern</button>
+          <!--Startet den Webservice ssBP_Update -->
         </div>
       </div>
     </div>
   </div>
-
 
   <!-- Header -->
   <nav class="fixed-nav-bar">
@@ -79,30 +75,22 @@
   </nav>
 
   <!-- Suche -->
-
-
   <div id="container">
-    <div class="row">
-      <div class="col-md-12">
-
-      </div>
-    </div>
-
     <div class="row">
       <div class="col-md-4">
         <div class="page-header">
-          <h3>Geschäftspertner suche</h3>
+          <h3>Geschäftspartner suche</h3>
         </div>
-
+        <div class="col-md-12 " id="error_search"></div>
+        <!--Div für Error Nachrichten. Wird im Fehlerfall automatscih abgefüllt  -->
         <form id="From_search" name="SearchForm">
           <div class="form-row">
+            <!--Inputfeld GP  -->
             <div id="div_i_gp" class="form-group col-md-6">
-              <label for="input_GP">Geschäftspertner</label>
-              <input name="input_GP" type="number" class="form-control" id="input_GP" placeholder="Geschäftspertner" maxlength="7" minlength="7">
-
-
-
+              <label for="input_GP">Geschäftspartner</label>
+              <input name="input_GP" type="number" class="form-control" id="input_GP" placeholder="Geschäftspartner" maxlength="7">
             </div>
+            <!--Selcetion GP Typ  -->
             <div class="form-group col-md-6">
               <label for="inputGP_Type">Geschäftspartnertyp:</label>
               <select id="inputGP_Type" class="form-control">
@@ -111,31 +99,29 @@
               <option value="2">Organisation</option>
               <option value="3">Gruppe</option>
             </select>
-
-
             </div>
           </div>
 
           <div class="form-row">
+            <!--Inputfeld Name 1 / Nachname  -->
             <div class="form-group col-md-6">
               <label for="input_Name1">Nachname / Name 1</label>
               <input name="input_Name1" type="text" class="form-control " id="input_Name1" placeholder="Firmen-, Gruppen- oder Nachname">
-
-
             </div>
+            <!--Inputfeld Name 2/ Vorname  -->
             <div class="form-group col-md-6">
-              <label for="input_Name2">Vorname / Name 2</label>
+              <label for="input_Name2">Vorname / Namenszusatz</label>
               <input type="text" class="form-control" id="input_Name2" placeholder="Namenzusatz oder Vorname">
             </div>
           </div>
 
           <div class="form-row">
+            <!--Inputfeld Strasse  -->
             <div class="form-group col-md-9">
               <label for="input_Street">Strasse</label>
               <input type="text" class="form-control" id="input_Street" placeholder="Strasse">
-
-
             </div>
+            <!--Inputfeld Hausnummer  -->
             <div class="form-group col-md-3">
               <label for="input_HouseNo">Hausnummer</label>
               <input type="text" class="form-control" id="input_HouseNo">
@@ -143,12 +129,12 @@
           </div>
 
           <div class="form-row">
+            <!--Inputfeld Ortschaft  -->
             <div class="form-group col-md-9">
               <label for="input_city">Ort</label>
               <input type="text" class="form-control" id="input_city" placeholder="Strasse">
-
-
             </div>
+            <!--Inputfeld PLZ  -->
             <div class="form-group col-md-3">
               <label for="input_PLZ">PLZ</label>
               <input type="text" class="form-control" id="input_PLZ">
@@ -156,75 +142,71 @@
           </div>
           <div class="form-group col-md-12">
             <button type="button" class="btn btn-primary" onclick="checkSearchForm()">Suchen</button>
+            <!--Aufruf der Funktion zur Feldvalidierung  -->
             <button type="button" class="btn btn-warning" data-toggle="collapse" data-target="#help">Hilfe</button>
+            <!--Öffnet die Hilfe  -->
             <button type="button" class="btn btn-default">Felder leeren</button>
-
           </div>
         </form>
       </div>
 
+      <!--Versteckter Hilfetext / sichtabr bei klick auf "hilfe" / zeile 138  -->
       <div id="help" class="collapse col-md-6">
         <div class="card card-body jumbotron ">
-          <h2 class="display-4">Hilfe zum Tool</h2>
-          <p class="lead">Nachfolgend finden Sie die Seite zu verwenden ist, und welche informationen sie Ihnen liefert. </p>
-          <hr class="my-4">
-          <p>Folgende Kriterien müssen beachtet werden, damit die Suche erfolgreich ist. </p>
-          <ul>
-            <li>Es muss mindestens 1 Feld ausgefüllt werden</li>
-            <li>Die Geschäftspartnernummer muss 7 Zeichen lang sein und darf nur werte von 0-9 enthalten</li>
-            <li>Je mehr Felder ausgefüllt werden, desto erfolgreicher die Suche</li>
-            <li>Die Angaben müssen genau sein.</li>
-            <li>Werden mehrere Treffer gefunden (Maximal 50), kann ein Datensatz ausgewählt werden</li>
-          </ul>
-          <p>Wurde erfolgreich ein Geschäftspartern gefunden/ausgewählt werden die die personlien, kominikationindormationen und, falls vorhanden, die QMC Produkte angezeigt. </p>
+          <div class="container">
+            <h2 class="display-4">Hilfe zum Tool</h2>
+            <p class="lead">Nachfolgend finden Sie die Seite zu verwenden ist, und welche informationen sie Ihnen liefert. </p>
+            <hr class="my-4">
+            <p>Folgende Kriterien müssen beachtet werden, damit die Suche erfolgreich ist. </p>
+            <ul>
+              <li>Es muss mindestens 1 Feld ausgefüllt werden</li>
+              <li>Die Geschäftspartnernummer muss 7 Zeichen lang sein und darf nur werte von 0-9 enthalten</li>
+              <li>Je mehr Felder ausgefüllt werden, desto erfolgreicher die Suche</li>
+              <li>Die Angaben müssen genau sein.</li>
+              <li>Werden mehrere Treffer gefunden (Maximal 50), kann ein Datensatz ausgewählt werden</li>
+            </ul>
+            <p>Wurde erfolgreich ein Geschäftspartern gefunden/ausgewählt werden die die personlien, kominikationindormationen und, falls vorhanden, die QMC Produkte angezeigt. </p>
+          </div>
         </div>
       </div>
-
-
-
     </div>
-    <!-- Shwo GP Information -->
+    <!-- GP Information anzeigen  -->
     <div class="collapse " id="show_GP_Details">
       <div class="card card-block">
         <div class="col-md-6">
-
           <div class="page-header">
             <h3>GP Informationen</h3>
-
-            <table>
-              <thead>
-              </thead>
-              <tbody id="t_details">
-              </tbody>
-            </table>
-
           </div>
+          <div id="error_getDetails" class="col-md-12"></div>
+          <!--Div für Error Nachrichten. Wird im Fehlerfall automatscih abgefüllt  -->
+          <table>
+            <thead>
+            </thead>
+            <tbody id="t_details">
+              <!--Tabelle mit allen GP Daten. Wird automatisch abgefüllt-->
+            </tbody>
+          </table>
         </div>
 
         <div class="col-md-6">
           <div class="page-header">
             <h3>QMC Produkte</h3>
-            <div id="d_qmc_selction">
-            </div>
-
-            <table>
-              <thead>
-              </thead>
-              <tbody id="t_qmc">
-              </tbody>
-            </table>
           </div>
+          <div id="error_QMC" class="col-md-12"></div>
+          <!--Div für Error Nachrichten. Wird im Fehlerfall automatscih abgefüllt  -->
+          <div id="d_qmc_selction"></div>
+          <!--div für die QMC selection Box -->
+          <table>
+            <tbody id="t_qmc"></tbody>
+            <!--Tabelle mit allen QMC Daten. Wird automatisch abgefüllt-->
+          </table>
         </div>
       </div>
-
-
-
     </div>
   </div>
-
 </body>
 
-
+<!-- JS Library -->
 <script src="js/jquery-3.3.1.min.js"></script>
 <script src="js/bootstrap/bootstrap.min.js"></script>
 <script src="js/jquery.soap/jquery.soap.js"></script>

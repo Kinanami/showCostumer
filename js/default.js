@@ -9,7 +9,7 @@ var v_active_gp = "";
 
 
 
-function search() {
+function ssBPSearch() {
 
   var error_message = '';
   var ex_gp = document.getElementById('input_GP').value;
@@ -20,9 +20,6 @@ function search() {
   var ex_HouseNo = document.getElementById('input_HouseNo').value;
   var ex_PLZ = document.getElementById('input_PLZ').value;
   var ex_city = document.getElementById('input_city').value;
-
-
-
 
   $.soap({
     url: 'http://sappot101.wwz.local:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=WEB_T&receiverParty=&receiverService=&interface=ssBP_Search&interfaceNamespace=http://wwz.ch/S/99980/BP_Search',
@@ -61,9 +58,11 @@ function search() {
       json_search = soapResponse.toJSON();
       result_count = json_search['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_SearchResponse'].Result_Count['#text'];
       $("#t_search").empty();
+      $("#modal_error").html("");
+      $("#modal_error").removeClass("alert alert-danger");
+      v_active_id = "";
 
       if (result_count > 1) {
-
 
         Object.keys(json_search['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_SearchResponse'].Persons_List.Person_Details).forEach(function(key) {
           if (key < 50) {
@@ -82,32 +81,32 @@ function search() {
           } else {
 
             $("#modal_error").html("<strong>Es wurden mehr als 50 Geschäftspartner gefunden</strong> Schrenken sie die Suche ein, um ein besseres ergbenbiss zu erhaleten.");
-            $("#modal_error").addClass("alert-danger");
+            $("#modal_error").addClass("alert alert-danger");
             return;
 
           }
         });
         $('#selection_modal').modal('show');
 
-
-
-      } else if (result_count == 1) { // // COMBAK: Dirket mit der Suche starten - kein Model öffnen
+      } else if (result_count == 1) {
         IM_GPNo = json_search['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_SearchResponse'].Persons_List.Person_Details.GP_No['#text'];
         v_active_gp = IM_GPNo;
         getDetails(v_active_gp);
 
 
 
-      } else {
+      } else if (result_count == 0) {
         error_message = json_search['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_SearchResponse'].Message.Message_Text['#text'];
-        // IDEA: Functin für Fehlerausgabe im Conten
+        $("#error_search").html(error_message);
+        $("#error_search").addClass("alert alert-danger");
       }
 
     },
 
     error: function(SOAPResponse) {
       error_message = 'Beim verarbeiten der Anfrage ist einfehler aufgetreten';
-      // IDEA: Functin für Fehlerausgabe im Conten
+      $("#error_search").html(error_message);
+      $("#error_search").addClass("alert alert-danger");
     }
   });
 }
@@ -149,123 +148,129 @@ function getDetails(selected_gp) {
       $("#t_details").empty();
 
       json_getDetail = soapResponse.toJSON();
-      if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Title) {
-        v_title = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Title['#text'];
+      if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Message.Message_Type['#text'] == "S") {
+        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Title) {
+          v_title = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Title['#text'];
 
-        $('#t_details').append('<tr><td>Anrede</td><td>' + v_title + '</td></tr>');
-      }
-
-      if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].GP_Type['#text'] == 1) {
-
-        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_1) {
-          v_name1 = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_1['#text'];
-
-          $('#t_details').append('<tr><td>Nachname</td><td>' + v_name1 + '</td></tr>');
+          $('#t_details').append('<tr><td>Anrede</td><td>' + v_title + '</td></tr>');
         }
 
-        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_2) {
-          v_name2 = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_2['#text'];
+        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].GP_Type['#text'] == 1) {
 
-          $('#t_details').append('<tr><td>Vorname</td><td>' + v_name2 + '</td></tr>');
+          if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_1) {
+            v_name1 = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_1['#text'];
+
+            $('#t_details').append('<tr><td>Nachname</td><td>' + v_name1 + '</td></tr>');
+          }
+
+          if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_2) {
+            v_name2 = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_2['#text'];
+
+            $('#t_details').append('<tr><td>Vorname</td><td>' + v_name2 + '</td></tr>');
+          }
+
+        } else {
+          if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_1) {
+            v_name1 = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_1['#text'];
+
+            $('#t_details').append('<tr><td>Name</td><td>' + v_name1 + '</td></tr>');
+          }
+
+          if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_2) {
+            v_name2 = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_2['#text'];
+
+            $('#t_details').append('<tr><td>Namenszusatz</td><td>' + v_name2 + '</td></tr>');
+          }
         }
 
+        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Street) {
+          v_street = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Street['#text'];
+
+          $('#t_details').append('<tr><td>Strasse</td><td>' + v_street + '</td></tr>');
+        }
+
+        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].PLZ) {
+          v_plz = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].PLZ['#text'];
+
+          $('#t_details').append('<tr><td>PLZ</td><td>' + v_plz + '</td></tr>');
+        }
+
+        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].City) {
+          v_city = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].City['#text'];
+
+          $('#t_details').append('<tr><td>Stadt</td><td>' + v_city + '</td></tr>');
+        }
+
+        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Region) {
+          v_region = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Region['#text'];
+
+          $('#t_details').append('<tr><td>Region</td><td>' + v_region + '</td></tr>');
+        }
+
+        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Country) {
+          v_country = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Country['#text'];
+
+          $('#t_details').append('<tr><td>Land</td><td>' + v_country + '</td></tr>');
+        }
+
+
+        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Count['#text'] == 1) {
+
+
+          v_tel_no = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Detail.Tel_No['#text'];
+          $('#t_details').append('<tr><td>Telefon</td><td>' + v_tel_no + '</td></tr>');
+
+        } else if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Count['#text'] > 1) {
+
+          Object.keys(json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Detail).forEach(function(key) {
+            v_tel_no = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Detail[key].Tel_No['#text'];
+            if (key > 0) {
+              $('#t_details').append('<tr><td></td><td>' + v_tel_no + '</td></tr>');
+            } else {
+              $('#t_details').append('<tr><td>Telefon</td><td>' + v_tel_no + '</td></tr>');
+            }
+
+
+          });
+        }
+
+
+
+        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Count['#text'] == 1) {
+
+
+          v_mail_adress = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Detail.E_Mail_Adress['#text'];
+          $('#t_details').append('<tr><td>E-Mail</td><td>' + v_mail_adress + '</td></tr>');
+
+        } else if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Count['#text'] > 1) {
+
+          Object.keys(json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Detail).forEach(function(key) {
+            v_mail_adress = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Detail[key].E_Mail_Adress['#text'];
+            if (key > 0) {
+              $('#t_details').append('<tr><td></td><td>' + v_mail_adress + '</td></tr>');
+            } else {
+              $('#t_details').append('<tr><td>E-Mail</td><td>' + v_mail_adress + '</td></tr>');
+            }
+
+          });
+
+
+        }
+        $('#t_details').append('<tr><td><button class="btn btn-primary" type="button" onclick="openChangeModus(v_active_gp)">Ändern</button></td></tr>');
+        $("#error_getDetails").html();
+        $("#error_getDetails").removeClass("alert alert-danger");
+        getQMCProducts(v_active_gp);
       } else {
-        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_1) {
-          v_name1 = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_1['#text'];
-
-          $('#t_details').append('<tr><td>Name</td><td>' + v_name1 + '</td></tr>');
-        }
-
-        if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_2) {
-          v_name2 = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Name_2['#text'];
-
-          $('#t_details').append('<tr><td>Namenszusatz</td><td>' + v_name2 + '</td></tr>');
-        }
+        error_message = 'Beim verarbeiten der Anfrage ist einfehler aufgetreten';
+        $("#error_getDetails").html(error_message);
+        $("#error_getDetails").addClass("alert alert-danger");
       }
-
-      if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Street) {
-        v_street = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Street['#text'];
-
-        $('#t_details').append('<tr><td>Strasse</td><td>' + v_street + '</td></tr>');
-      }
-
-      if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].PLZ) {
-        v_plz = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].PLZ['#text'];
-
-        $('#t_details').append('<tr><td>PLZ</td><td>' + v_plz + '</td></tr>');
-      }
-
-      if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].City) {
-        v_city = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].City['#text'];
-
-        $('#t_details').append('<tr><td>Stadt</td><td>' + v_city + '</td></tr>');
-      }
-
-      if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Region) {
-        v_region = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Region['#text'];
-
-        $('#t_details').append('<tr><td>Region</td><td>' + v_region + '</td></tr>');
-      }
-
-      if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Country) {
-        v_country = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Country['#text'];
-
-        $('#t_details').append('<tr><td>Land</td><td>' + v_country + '</td></tr>');
-      }
-
-
-      //
-
-
-      if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Count['#text'] == 1) {
-
-
-        v_tel_no = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Detail.Tel_No['#text'];
-        $('#t_details').append('<tr><td>Telefon</td><td>' + v_tel_no + '</td></tr>');
-
-      } else if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Count['#text'] > 1) {
-
-        Object.keys(json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Detail).forEach(function(key) {
-          v_tel_no = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Detail[key].Tel_No['#text'];
-          if (key > 0) {
-            $('#t_details').append('<tr><td></td><td>' + v_tel_no + '</td></tr>');
-          } else {
-            $('#t_details').append('<tr><td>Telefon</td><td>' + v_tel_no + '</td></tr>');
-          }
-
-
-        });
-      }
-
-
-
-      if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Count['#text'] == 1) {
-
-
-        v_mail_adress = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Detail.E_Mail_Adress['#text'];
-        $('#t_details').append('<tr><td>E-Mail</td><td>' + v_mail_adress + '</td></tr>');
-
-      } else if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Count['#text'] > 1) {
-
-        Object.keys(json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Detail).forEach(function(key) {
-          v_mail_adress = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Detail[key].E_Mail_Adress['#text'];
-          if (key > 0) {
-            $('#t_details').append('<tr><td></td><td>' + v_mail_adress + '</td></tr>');
-          } else {
-            $('#t_details').append('<tr><td>E-Mail</td><td>' + v_mail_adress + '</td></tr>');
-          }
-
-        });
-
-
-      }
-      $('#t_details').append('<tr><td><button class="btn btn-primary" type="button" onclick="openChangeModus(v_active_gp)">Ändern</button></td></tr>');
-      getQMCProducts(v_active_gp);
     },
 
     error: function(soapResponse) {
-      error_message = 'Beim verarbeiten der Anfrage ist einfehler aufgetreten';
-      // IDEA: Functin für Fehlerausgabe im Conten
+      error_message = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Message.Message_Text['#text'];
+      $("#error_getDetails").html(error_message);
+      $("#error_getDetails").addClass("alert alert-danger");
     },
   });
 }
@@ -370,14 +375,11 @@ function getQMCProducts(selected_gp) {
 
         });
 
-
-
-
-
       } else {
 
         v_message = json_QMC['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_QMCProductsResponse'].Message.Message_Text['#text'];
-        $('#d_qmc_selction').append(v_message);
+        $('#error_QMC').append(v_message);
+
       }
 
     },
@@ -385,48 +387,42 @@ function getQMCProducts(selected_gp) {
 
     error: function(soapResponse) {
       error_message = 'Beim verarbeiten der QMC IDs ist ein Fehler aufgetreten (Webservice BP_QMCProducts)';
-      // IDEA: Functin für Fehlerausgabe im Conten
+      $("#error_QMC").html(error_message);
+      $("#error_QMC").addClass("alert alert-danger");
     },
   });
 
 }
 
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
+// Funktion zum überprüfen der Felder
 function checkSearchForm() {
-  var Fehler = "";
-  var Fehler_Message = "";
-
-  if (document.forms.SearchForm.input_GP.value.length > 0 && document.forms.SearchForm.input_GP.value.length < 7) {
-    Fehler = "X";
-    Fehler_Message = "<li>Die länge der Geschäftspartnernummer ist zu kurz. Die Nummer muss 7-Zeichen lang sein.</li>";
-    document.getElementById('div_i_gp').classList.add('has-error');
-
-
-  }
-
-  if (document.forms.SearchForm.input_GP.value == "" && document.forms.SearchForm.input_Name2.value == "" &&
+  var error = ""; // Hilfsvariabel : wird gesetzt sobald ein eingabe nicht in ordnung ist
+  var error_Message = "";
+// GP Wert = 1, 2, 3, 4, 5 oder 6?
+  if (document.forms.SearchForm.input_GP.value.length > 0 && document.forms.SearchForm.input_GP.value.length < 7) { //
+    error = "X";
+    error_Message = "Die länge der Geschäftspartnernummer ist zu kurz. Die Nummer muss 7-Zeichen lang sein.";
+    document.getElementById('div_i_gp').classList.add('has-error'); // klasse hinzufügen für rotes Inputfeld
+  } // Überprüfung ob ein Feld ausgefüllt
+  else if (document.forms.SearchForm.input_GP.value == "" && document.forms.SearchForm.input_Name2.value == "" &&
     document.forms.SearchForm.input_Name1.value == "" && document.forms.SearchForm.input_Street.value == "" &&
     document.forms.SearchForm.input_HouseNo.value == "" && document.forms.SearchForm.input_city.value == "" &&
     document.forms.SearchForm.input_PLZ.value == "") {
-    Fehler = "X";
-    Fehler_Message = Fehler_Message + "<li>Mindestens ein Feld muss ausgefüllt werden.</li>";
-    document.getElementById('From_search').classList.add('has-error');
-
+    error = "X";
+    error_Message = error_Message + "Mindestens ein Feld muss ausgefüllt werden.";
+    document.getElementById('From_search').classList.add('has-error'); // klasse hinzufügen für rotes Inputfeld
   }
-  if (Fehler == "X") {
-    Fehler_Message = "<ul style='list-style-type:disc'>" + Fehler_Message + "</ul>";
-    var error_message = document.createElement("DIV");
-    error_message.classList.add('alert');
-    error_message.classList.add('alert-danger');
-    var error_message_text = document.createTextNode(Fehler_Message);
-    error_message.appendChild(error_message_text);
-    //document.container.appendChild(error_message);
+  // Überprüfen ob ein inkorekte eingabe gefunden wurde
+  if (error == "X") {
+    $("#error_search").html(error_Message); // fehlermedung im vorgesehnen Div ausgeben
+    $("#error_search").addClass("alert alert-danger"); // klasse hinzufügen für rotes Inputfeld
 
   } else {
-    search();
+    document.getElementById('div_i_gp').classList.remove('has-error');
+    document.getElementById('From_search').classList.remove('has-error');
+    $("#error_search").html(""); // Fehlermeldungen entfernen fals vorhanden
+    $("#error_search").removeClass("alert alert-danger");
+    ssBPSearch(); // Webservice staren
   }
 }
 
@@ -547,13 +543,13 @@ function openChangeModus(change_id) {
   if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Count['#text'] == 1) {
     v_tel_no = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Detail.Tel_No['#text'];
     v_tel_id = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Detail.Tel_ID['#text'];
-    $('#form_changeData').append('<div class="form-group row"><label for="' + v_tel_no + '" class="col-sm-4 col-form-label">Telefon</label><div class="col-sm-8"><input type="text" class="form-control" id="tel' + v_tel_id + '" placeholder="' + v_tel_no + '"></div></div>');
+    $('#form_changeData').append('<div class="form-group row"><label for="' + v_tel_no + '" class="col-sm-4 col-form-label">Telefon</label><div id="div_t' + v_tel_id + '" class="col-sm-8"><input type="text" class="form-control" id="tel' + v_tel_id + '" placeholder="' + v_tel_no + '"></div></div>');
   } else if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Count['#text'] > 1) {
 
     Object.keys(json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Detail).forEach(function(key) {
       v_tel_no = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Detail[key].Tel_No['#text'];
       v_tel_id = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Detail[key].Tel_ID['#text'];
-      $('#form_changeData').append('<div class="form-group row"><label for="' + v_tel_no + '" class="col-sm-4 col-form-label">Telefon</label><div class="col-sm-8"><input type="text" class="form-control" id="tel' + v_tel_id + '" placeholder="' + v_tel_no + '"></div></div>');
+      $('#form_changeData').append('<div class="form-group row"><label for="' + v_tel_no + '" class="col-sm-4 col-form-label">Telefon</label><div id="div_t' + v_tel_id + '" class="col-sm-8"><input type="text" class="form-control" id="tel' + v_tel_id + '" placeholder="' + v_tel_no + '"></div></div>');
     });
   }
 
@@ -562,14 +558,14 @@ function openChangeModus(change_id) {
 
     v_mail_adress = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Detail.E_Mail_Adress['#text'];
     v_mail_id = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Detail.E_Mail_ID['#text'];
-    $('#form_changeData').append('<div class="form-group row"><label for="' + v_mail_id + '" class="col-sm-4 col-form-label">E-Mail</label><div class="col-sm-8"><input type="text" class="form-control" id="mail' + v_mail_id + '" placeholder="' + v_mail_adress + '"></div></div>');
+    $('#form_changeData').append('<div class="form-group row"><label for="' + v_mail_id + '" class="col-sm-4 col-form-label">E-Mail</label><div id="div_m' + v_mail_id + '" class="col-sm-8"><input type="text" class="form-control" id="mail' + v_mail_id + '" placeholder="' + v_mail_adress + '"></div></div>');
 
   } else if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Count['#text'] > 1) {
 
     Object.keys(json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Detail).forEach(function(key) {
       v_mail_adress = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Detail[key].E_Mail_Adress['#text'];
       v_mail_id = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Detail[key].E_Mail_ID['#text'];
-      $('#form_changeData').append('<div class="form-group row"><label for="' + v_mail_id + '" class="col-sm-4 col-form-label">E-Mail</label><div class="col-sm-8"><input type="text" class="form-control" id="mail' + v_mail_id + '" placeholder="' + v_mail_adress + '"></div></div>');
+      $('#form_changeData').append('<div class="form-group row"><label for="' + v_mail_id + '" class="col-sm-4 col-form-label">E-Mail</label><div id="div_m' + v_mail_id + '" class="col-sm-8"><input type="text" class="form-control" id="mail' + v_mail_id + '" placeholder="' + v_mail_adress + '"></div></div>');
 
     });
   }
@@ -589,61 +585,57 @@ function ssBP_Update() {
   xml.push('  <soapenv:Header/>');
   xml.push('<soapenv:Body>');
   xml.push('<bp:BP_UpdateRequest>');
-  xml.push('<GP_No>'+v_active_gp+'</GP_No>');
-  xml.push('<Title>'+v_change_title+'</Title>');
-  xml.push('<Name_1>'+v_change_name1+'</Name_1>');
-  xml.push('<Name_2>'+v_change_name2+'</Name_2>');
+  xml.push('<GP_No>' + v_active_gp + '</GP_No>');
+  xml.push('<Title>' + v_change_title + '</Title>');
+  xml.push('<Name_1>' + v_change_name1 + '</Name_1>');
+  xml.push('<Name_2>' + v_change_name2 + '</Name_2>');
 
 
   if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Count['#text'] == 1) {
     var input_tel_id = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Detail.Tel_ID['#text'];
     var v_change_tel_no = document.getElementById("input_tel_id").value;
-    var v_change_tel_id =document.getElementById("input_tel_id").id;
+    var v_change_tel_id = document.getElementById("input_tel_id").id;
 
     xml.push('<Tel_Change_List><Tel_Change_Detail><Tel_Number>' + v_change_tel_no + '</Tel_Number><Tel_ID>' + v_change_tel_id + '</Tel_ID></Tel_Change_Detail></Tel_Change_List>');
 
-    }
-
-  else if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Count['#text'] > 1) {
+  } else if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Count['#text'] > 1) {
     xml.push('<Tel_Change_List>');
     Object.keys(json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Detail).forEach(function(key) {
       var v_change_tel_id = 'tel' + json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].Tel_List.Tel_Detail[key].Tel_ID['#text'];
 
       var v_change_tel_no = document.getElementById(v_change_tel_id).value;
-      if(v_change_tel_no != ""){
-      xml.push('<Tel_Change_Detail><Tel_Number>' + v_change_tel_no + '</Tel_Number><Tel_ID>' + v_change_tel_id + '</Tel_ID></Tel_Change_Detail>');
-    }
+      if (v_change_tel_no != "") {
+        xml.push('<Tel_Change_Detail><Tel_Number>' + v_change_tel_no + '</Tel_Number><Tel_ID>' + v_change_tel_id + '</Tel_ID></Tel_Change_Detail>');
+      }
     });
     xml.push('</Tel_Change_List>');
   }
 
-//--------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
 
-if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Count['#text'] == 1) {
-  var input_mail_id = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Detail.E_Mail_ID['#text'];
-  var v_change_mail_no = document.getElementById("input_mail_id").value;
-  var v_change_mail_id = document.getElementById("input_mail_id").id;
+  if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Count['#text'] == 1) {
+    var input_mail_id = json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Detail.E_Mail_ID['#text'];
+    var v_change_mail_no = document.getElementById("input_mail_id").value;
+    var v_change_mail_id = document.getElementById("input_mail_id").id;
 
-  xml.push('<E_Mail_Change_List><E_Mail_Detail><E_Mail_Adress>' + v_change_mail_no + '</E_Mail_Adress></E_Mail_Adress>' + v_change_mail_id + '</E_Mail_ID></E_Mail_Detail></E_Mail_Change_List>');
+    xml.push('<E_Mail_Change_List><E_Mail_Detail><E_Mail_Adress>' + v_change_mail_no + '</E_Mail_Adress></E_Mail_Adress>' + v_change_mail_id + '</E_Mail_ID></E_Mail_Detail></E_Mail_Change_List>');
 
-}
+  } else if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Count['#text'] > 1) {
+    xml.push('<E_Mail_Change_List>');
+    Object.keys(json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Detail).forEach(function(key) {
+      v_change_mail_id = 'mail' + json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Detail[key].E_Mail_ID['#text'];
+      var v_change_mail_no = document.getElementById(v_change_mail_id).value;
+      if (v_change_mail_no != "") {
 
-else if (json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Count['#text'] > 1) {
-  xml.push('<E_Mail_Change_List>');
-  Object.keys(json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Detail).forEach(function(key) {
-  v_change_mail_id   = 'mail' +json_getDetail['#document']['SOAP:Envelope']['SOAP:Body']['n0:BP_GetDetailsResponse'].E_Mail_List.E_Mail_Detail[key].E_Mail_ID['#text'];
-var v_change_mail_no = document.getElementById(v_change_mail_id).value;
-    if(v_change_mail_no != ""){
+        xml.push('<E_Mail_Detail><E_Mail_Adress>' + v_change_mail_no + '</E_Mail_Adress><E_Mail_ID>' + v_change_mail_id + '</E_Mail_ID></E_Mail_Detail>');
+      }
+    });
+    xml.push('</E_Mail_Change_List>');
+  }
 
-    xml.push('<E_Mail_Detail><E_Mail_Adress>' + v_change_mail_no + '</E_Mail_Adress><E_Mail_ID>' + v_change_mail_id + '</E_Mail_ID></E_Mail_Detail>');
-}
-  });
-  xml.push('</E_Mail_Change_List>');
-}
-
-xml.push('</bp:BP_UpdateRequest>');
-xml.push('</soapenv:Body>');
-xml.push('</soapenv:Envelope>');
+  xml.push('</bp:BP_UpdateRequest>');
+  xml.push('</soapenv:Body>');
+  xml.push('</soapenv:Envelope>');
 
 
   $.soap({
@@ -661,12 +653,81 @@ xml.push('</soapenv:Envelope>');
     },
 
     success: function(soapResponse) {
-      alert('Erfolgreich');
+
     },
 
     error: function(soapResponse) {
-        alert('Fehler');
+      alert('Fehler');
     }
   });
+
+}
+
+
+function checkUpdateForm() {
+  var Fehler = "";
+  var Fehler_Message = "";
+  var elementId = "";
+  var parentId = "";
+  var fail = "";
+
+  var v_inputFields = document.querySelector("#form_changeData").querySelectorAll("[id]");
+  for (var i = 0, len = v_inputFields.length; i < len; i++) {
+    var v_Field = v_inputFields[i];
+    if (v_Field.id.indexOf("tel") > -1) {
+      var v_checkNo = document.getElementById(v_Field.id).value;
+      v_checkNo = v_checkNo.replace(/\s/g, '');
+      if (isNaN(v_checkNo) == true) {
+        elementId = document.getElementById(v_Field.id);
+        parentId = elementId.parentNode.id;
+        document.getElementById(parentId).classList.add('has-error');
+        Fehler_Message = Fehler_Message + "Ungültige Telefonnummer:" +v_checkNo + "<br />";
+        fail = "X";
+      } else {
+        elementId = document.getElementById(v_Field.id);
+        parentId = elementId.parentNode.id;
+        document.getElementById(parentId).classList.remove('has-error');
+
+      }
+    } else if (v_Field.id.indexOf("mail") > -1) {
+if (document.getElementById(v_Field.id).value != "") {
+        if (!validEmail(document.getElementById(v_Field.id).value)) {
+        elementId = document.getElementById(v_Field.id);
+        parentId = elementId.parentNode.id;
+        document.getElementById(parentId).classList.add('has-error');
+        Fehler_Message = Fehler_Message + "Ungültige E-Mail: " + document.getElementById(v_Field.id).value + "<br />";
+        fail = "X";
+      } else {
+        elementId = document.getElementById(v_Field.id);
+        parentId = elementId.parentNode.id;
+        document.getElementById(parentId).classList.remove('has-error');
+
+      }
+
+
+
+      }
+    }
+  }
+
+  if (fail != "X") {
+    $("#change_Modal_error").html("");
+    $("#change_Modal_error").removeClass("alert alert-danger");
+    ssBP_Update();
+  }
+  else {
+    $("#change_Modal_error").html(Fehler_Message);
+    $("#change_Modal_error").addClass("alert alert-danger");
+  }
+
+}
+
+function validEmail(email) {
+
+  var strReg = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+
+  var regex = new RegExp(strReg);
+
+  return (regex.test(email));
 
 }
